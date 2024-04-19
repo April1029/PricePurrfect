@@ -14,118 +14,87 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
-// other imports
-
+import java.util.Random;
 
 public class PetcoScraper {
+
+  // Method to assemble the URL with search query parameters
+  private static String assembleURL(String brand, String item) throws Exception {
+    String baseurl = "https://www.petco.com/shop/en/petcostore/search?query=";
+    String query = brand + " " + item;
+    String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8).replace("+", "%20");
+    return baseurl + encodedQuery;
+  }
+
+
+  // Method to perform search operation
+  private static void performSearch(WebDriver driver, WebDriverWait wait, Actions actions, Random random, String brand, String item) throws InterruptedException {
+    try {
+      WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("suggested-store-modal")));
+      if (modal.isDisplayed()) {
+        WebElement closeModalButton = driver.findElement(By.cssSelector("button-to-close-modal")); // Replace with the actual selector to close the modal
+        closeModalButton.click();
+      }
+    } catch (Exception e) {
+      // If modal is not found or not visible, proceed
+    }
+
+    WebElement searchBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("header-search")));
+    JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
+    jsExecutor.executeScript("arguments[0].click();", searchBox);
+    searchBox.clear();
+    searchBox.sendKeys(brand + " " + item);
+    Thread.sleep(1000 + random.nextInt(2000));
+    String enteredSearchTerm = searchBox.getAttribute("value");
+    System.out.println("Entered Search Term: " + enteredSearchTerm);
+    WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[aria-label='Search']")));
+    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", searchButton);
+    actions.moveToElement(searchButton).click().perform();
+  }
+
+  // Method to parse and extract data from the loaded results
+  private static void parseResults(WebDriver driver, String brand, String item) {
+    String pageSource = driver.getPageSource();
+    Document doc = Jsoup.parse(pageSource);
+    Elements itemTitles = doc.select(".ProductTile-styled__ProductInfoContainer-sc-8250527c-2.coylKt");
+    Elements itemPrices = doc.select(".typography__StyledTypography-sc-787b37da-0.typography___StyledStyledTypography-sc-787b37da-1.gKxANB.cbuIEA.price___StyledTypography-sc-e02ddb13-0.fvnbvH");
+
+    for (int i = 0; i < itemTitles.size(); i++) {
+      Element title = itemTitles.get(i);
+      Element price = (itemPrices.size() > i) ? itemPrices.get(i) : null;
+
+      if (title.text().toLowerCase().contains(item) && title.text().toLowerCase().contains(brand)) {
+        String outputMessage = "Title: " + title.text();
+        if (price != null) {
+          outputMessage += " | Price: " + price.text();
+        } else {
+          outputMessage += "Price not found";
+        }
+        System.out.println(outputMessage);
+      }
+    }
+  }
+
   public static void main(String[] args) {
     String brand = "arm & hammer";
     String item = "deodorizer";
 
-//    // Set path to the ChromeDriver executable
-//    System.setProperty("webdriver.chrome.driver", "/Users/jujuba/Downloads/chromedriver-mac-arm64/chromedriver");
-//
-//    ChromeOptions options = new ChromeOptions();
-//    // options.addArguments("--headless=new");
-//    options.addArguments("--disable-gpu");
-//    options.addArguments("--window-size=1920,1200");
-//    options.addArguments("--ignore-certificate-errors");
-//    options.addArguments("--disable-blink-features=AutomationControlled");
-////    options.addArguments("--remote-debugging-port=9222");
-
     FirefoxOptions options = new FirefoxOptions();
     options.addArguments("--headless");
     WebDriver driver = new FirefoxDriver(options);
-//    WebDriver driver = new ChromeDriver(options);
     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     Actions actions = new Actions(driver);
+    Random random = new Random();
 
     try {
-      // Construct the URL with search query parameters
-      String baseurl = "https://www.petco.com/shop/en/petcostore/search?query=";
-
-      String query = brand + " " + item;
-      String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8).replace("+", "%20");
-      String newUrl = baseurl + encodedQuery;
-//      driver.get(newUrl);
-//      System.out.println(driver.getCurrentUrl());
+      String newUrl = assembleURL(brand, item);
       System.out.println("The assembled url is:" + newUrl);
-//      System.out.println(driver.getPageSource());
       driver.get(newUrl);
-      //System.out.println(driver.getPageSource());
-
-      // Check if a modal is present and close it if it is
-      try {
-        WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("suggested-store-modal")));
-        if (modal.isDisplayed()) {
-          WebElement closeModalButton = driver.findElement(By.cssSelector("button-to-close-modal")); // Replace with the actual selector to close the modal
-          closeModalButton.click();
-        }
-      } catch (Exception e) {
-        // If modal is not found or not visible, proceed
-      }
-
-      WebElement searchBox = wait.until(ExpectedConditions.presenceOfElementLocated(
-          By.id("header-search")));
-
-
-      JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
-      jsExecutor.executeScript("arguments[0].click();", searchBox);
-
-      // Wait for the search box to be present in the DOM and enter the search terms
-      searchBox.clear();
-      searchBox.sendKeys(brand + " " + item);
-      Thread.sleep(1000);
-      String enteredSearchTerm = searchBox.getAttribute("value");
-
-      System.out.println("Entered Search Term: " + enteredSearchTerm);
-
-
-
-      // Scroll to the search button and click it
-      WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[aria-label='Search']")));
-      ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", searchButton);
-      actions.moveToElement(searchButton).click().perform();
-
-
-      // Wait for the results to load using an appropriate condition
-      // This should be updated with an actual condition that reflects the results being loaded
-//      wait.until(ExpectedConditions.visibilityOfElementLocated(
-//          By.className("ProductListingGrid_gridContainer__FNS4h.js-tracked-product-list")
-//      ));
-
-      // Parse the loaded results
-      String pageSource = driver.getPageSource();
-      Document doc = Jsoup.parse(pageSource);
-
-      // Extract and print titles and prices using Jsoup selectors that match the page content
-      Elements itemTitles = doc.select(".ProductTile-styled__ProductInfoContainer-sc-8250527c-2.coylKt");
-      Elements itemPrices = doc.select(".typography__StyledTypography-sc-787b37da-0 typography___StyledStyledTypography-sc-787b37da-1.gKxANB.cbuIEA.price___StyledTypography-sc-e02ddb13-0.fvnbvH");
-
-      for (int i = 0; i < itemTitles.size(); i++) {
-        Element title = itemTitles.get(i);
-        // Handle cases where there might be more titles than prices
-        Element price;
-        if (itemPrices.size() > i) {
-          price = itemPrices.get(i);
-        } else {
-          price = null;
-        }
-
-        if (title.text().toLowerCase().contains(item) && title.text().toLowerCase().contains(brand)){
-          String outputMessage = "Title: " + title.text();
-          if (price != null) {
-            outputMessage += " | Price: " + price.text();
-          } else {
-            outputMessage += "Price not found";
-          }
-          System.out.println(outputMessage);
-        }
-      }
-
-    } catch (InterruptedException e) {
+      performSearch(driver, wait, actions, random, brand, item);
+      parseResults(driver,brand, item);
+    } catch (Exception e) {
       throw new RuntimeException(e);
-    }finally {
+    } finally {
       if (driver != null) {
         driver.quit();
       }
