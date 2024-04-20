@@ -7,7 +7,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class PetSmartScraper implements Scraper {
-  private List<String> results = new ArrayList<>();
+  private List<Product> results = new ArrayList<>();
 
   @Override
   public String assembleURL(String brand, String item) {
@@ -36,13 +36,14 @@ public class PetSmartScraper implements Scraper {
       Element title = itemTitles.get(i);
       Element price = itemPrices.get(i);
       if (title.text().toLowerCase().contains(item.toLowerCase()) && title.text().toLowerCase().contains(brand.toLowerCase())) {
-        results.add("Title: " + title.text() + " | Price: " + price.text());
+        Product product = new Product(title.text(), price.text());
+        results.add(product);
       }
     }
   }
 
   @Override
-  public List<String> getResults() {
+  public List<Product> getResults() {
     return results;
   }
 }

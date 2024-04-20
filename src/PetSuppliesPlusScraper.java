@@ -25,7 +25,7 @@ public class PetSuppliesPlusScraper implements Scraper {
   private Actions actions;
   private String brand;
   private  String item;
-  private List<String> results = new ArrayList<>();
+  private List<Product> results = new ArrayList<>();
 
   public PetSuppliesPlusScraper (String brand, String item) {
     this.brand = brand;
@@ -95,19 +95,21 @@ public class PetSuppliesPlusScraper implements Scraper {
 
       if (title.text().toLowerCase().contains(this.item.toLowerCase()) && title.text().toLowerCase().contains(this.brand.toLowerCase())) {
 
-        String outputMessage = "Title: " + title.text();
-        if (price != null) {
-          outputMessage += " | Price: " + price.text();
-        } else {
-          outputMessage += "Price not found";
-        }
-        results.add(outputMessage);
+        //String outputMessage = "Title: " + title.text();
+        //if (price != null) {
+        //  outputMessage += " | Price: " + price.text();
+        //} else {
+        //  outputMessage += "Price not found";
+        //}
+        // results.add(outputMessage);
+        Product product = new Product(title.text(), price.text());
+        results.add(product);
       }
     }
   }
 
   @Override
-  public List<String> getResults() {
+  public List<Product> getResults() {
     return results;
   }
 

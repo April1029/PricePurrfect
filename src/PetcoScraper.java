@@ -25,7 +25,7 @@ import java.util.Random;
 
 public class PetcoScraper implements Scraper {
 
-  private List<String> results = new ArrayList<>();
+  private List<Product> results = new ArrayList<>();
 
   private WebDriver driver;
   private WebDriverWait wait;
@@ -104,37 +104,15 @@ public class PetcoScraper implements Scraper {
         String priceText = price.text();
 
         if (titleText.toLowerCase().contains(item.toLowerCase()) && titleText.toLowerCase().contains(brand.toLowerCase())) {
-          results.add("Title: " + titleText + " | Price: " + priceText);
+          Product product = new Product(title.text(), price.text());
+          results.add(product);
         }
       }
     }
   }
 
   @Override
-  public List<String> getResults() {
+  public List<Product> getResults() {
     return results;
   }
-
-  public static void main(String[] args) {
-    String brand = "orijen";
-    String item = "cat food";
-
-    PetcoScraper scraper = new PetcoScraper(brand,item);
-
-    try {
-      String newUrl = scraper.assembleURL(brand, item);
-      System.out.println("Fetching URL: " + newUrl); // Debug URL fetching
-      //driver.get(newUrl);
-      Document doc = scraper.performSearch(newUrl);
-      System.out.println("Document fetched, parsing results..."); // Debug document fetch
-      scraper.parseResults(doc,brand, item);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    } finally {
-      if (scraper.driver != null) {
-        scraper.driver.quit();
-      }
-    }
-  }
-
 }

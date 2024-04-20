@@ -10,7 +10,7 @@ import org.jsoup.select.Elements;
 
 public class AmazonScraper implements Scraper {
 
-  private List<String> results = new ArrayList<>();
+  private List<Product> results = new ArrayList<>();
 
   @Override
   public String assembleURL(String brand, String item) {
@@ -67,6 +67,7 @@ public class AmazonScraper implements Scraper {
       if (fraction.isEmpty()) {
         fraction = "00";
       }
+      String price = whole + "." + fraction;
 
       //System.out.println("Title: " + title + " | Price: " + whole + "." + fraction);
 
@@ -75,14 +76,16 @@ public class AmazonScraper implements Scraper {
       // problem encountered: what if the user typed in brand with/without proper space?
       if (!title.isEmpty() && !whole.isEmpty()) {
         if (title.toLowerCase().contains(item.toLowerCase()) && title.toLowerCase().contains(brand.toLowerCase())) {
-          results.add("Title: " + title+ " | Price: " + whole + "." + fraction);
+          //results.add("Title: " + title+ " | Price: " + whole + "." + fraction);
+          Product product = new Product(title, price);
+          results.add(product);
         }
       }
     }
   }
 
   @Override
-  public List<String> getResults() {
+  public List<Product> getResults() {
     return results;
   }
 

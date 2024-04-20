@@ -1,3 +1,4 @@
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import org.jsoup.nodes.Document;
@@ -28,7 +29,7 @@ public class ScraperFactory {
       Document petSmartDoc  = petSmartScraper.performSearch(petSmarturl);
       System.out.println("Document from PetSmart fetched, parsing results...");
       petSmartScraper.parseResults(petSmartDoc, brand, item);
-      List<String> smartResults = petSmartScraper.getResults();
+      List<Product> petSmartResults = petSmartScraper.getResults();
 
       // Run PetSuppliesPlus scraper
       String petSuppliesPlusturl = petSuppliesPlusScraper.assembleURL(brand, item);
@@ -38,7 +39,7 @@ public class ScraperFactory {
       System.out.println("Document from PetSuppliesPlus fetched, parsing results...");
 
       petSuppliesPlusScraper.parseResults(petSuppliesPlusDoc, brand, item);
-      List<String> petSuppliesPlusResults = petSuppliesPlusScraper.getResults();
+      List<Product> petSuppliesPlusResults = petSuppliesPlusScraper.getResults();
 
       // Run Amazon scraper
       String amazonturl = amazonScraper.assembleURL(brand, item);
@@ -48,7 +49,7 @@ public class ScraperFactory {
       System.out.println("Document from Amazon fetched, parsing results...");
 
       amazonScraper.parseResults(amazonDoc, brand, item);
-      List<String> amazonResults = amazonScraper.getResults();
+      List<Product> amazonResults = amazonScraper.getResults();
 
       // Run Petco scraper
       String petcoturl = petcoScraper.assembleURL(brand, item);
@@ -58,11 +59,14 @@ public class ScraperFactory {
       System.out.println("Document from Petco fetched, parsing results...");
 
       petcoScraper.parseResults(petcoDoc, brand, item);
-      List<String> petcoResults = petcoScraper.getResults();
+      List<Product> petcoResults = petcoScraper.getResults();
+
+      // Write results to CSV
+      CSVWriter.writeToCSV(petSmartResults, petSuppliesPlusResults, amazonResults, petcoResults);
 
       // Print all results
       System.out.println("PetSmart Results:");
-      smartResults.forEach(System.out::println);
+      petSmartResults.forEach(System.out::println);
 
       System.out.println("PetSuppliesPlus Results:");
       petSuppliesPlusResults.forEach(System.out::println);
@@ -75,6 +79,8 @@ public class ScraperFactory {
 
     } catch (IOException | InterruptedException e) {
       System.err.println("Failed to retrieve data: " + e.getMessage());
+    } finally {
+      scanner.close();
     }
   }
 }

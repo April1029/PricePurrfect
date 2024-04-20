@@ -48,5 +48,5 @@ public interface Scraper {
    *
    * @return A list of strings each representing a found item with its price details.
    */
-  List<String> getResults();
+  List<Product> getResults();
 }
