@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -8,21 +10,7 @@ import org.jsoup.select.Elements;
 
 public class AmazonScraper implements Scraper {
 
-  public static void main(String[] args) {
-    String brand = "arm & hammer";
-    String item = "deodorizer";
-
-    AmazonScraper scraper = new AmazonScraper();
-    try {
-      String url = scraper.assembleURL(brand, item);
-      System.out.println("Fetching URL: " + url); // Debug URL fetching
-      Document doc = scraper.performSearch(url);
-      System.out.println("Document fetched, parsing results..."); // Debug document fetch
-      scraper.parseResults(doc, brand, item);
-    } catch (IOException e) {
-      System.err.println("Failed to retrieve data: " + e.getMessage());
-    }
-  }
+  private List<String> results = new ArrayList<>();
 
   @Override
   public String assembleURL(String brand, String item) {
@@ -58,7 +46,7 @@ public class AmazonScraper implements Scraper {
     // Select all items in the search result
     Elements items = doc.select(".s-result-item");
     //System.out.println(items);
-    System.out.println("Found " + items.size() + " items"); // Debug number of items found
+    System.out.println("Found " + items.size() + " items from Amazon"); // Debug number of items found
 
 
     // Loop through each item element
@@ -86,10 +74,16 @@ public class AmazonScraper implements Scraper {
       // Do another layer of filtering here
       // problem encountered: what if the user typed in brand with/without proper space?
       if (!title.isEmpty() && !whole.isEmpty()) {
-        if (title.toLowerCase().contains(item) && title.toLowerCase().contains(brand)) {
-          System.out.println("Title: " + title + " | Price: " + whole + "." + fraction);
+        if (title.toLowerCase().contains(item.toLowerCase()) && title.toLowerCase().contains(brand.toLowerCase())) {
+          results.add("Title: " + title+ " | Price: " + whole + "." + fraction);
         }
       }
     }
   }
+
+  @Override
+  public List<String> getResults() {
+    return results;
+  }
+
 }

@@ -2,6 +2,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -23,6 +25,7 @@ public class PetSuppliesPlusScraper implements Scraper {
   private Actions actions;
   private String brand;
   private  String item;
+  private List<String> results = new ArrayList<>();
 
   public PetSuppliesPlusScraper (String brand, String item) {
     this.brand = brand;
@@ -98,39 +101,14 @@ public class PetSuppliesPlusScraper implements Scraper {
         } else {
           outputMessage += "Price not found";
         }
-        System.out.println(outputMessage);
+        results.add(outputMessage);
       }
     }
   }
 
-  public static void main(String[] args) {
-    String brand ="Instinct";
-    String item = "Dry cat food";
-    //ChromeOptions options = new ChromeOptions();
-    //options.addArguments("--headless");
-    //options.addArguments("--disable-gpu");
-    //options.addArguments("--window-size=1920,1200");
-    //options.addArguments("--ignore-certificate-errors");
-
-   // WebDriver driver = new ChromeDriver(options);
-    //WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-    // Actions actions = new Actions(driver);
-    PetSuppliesPlusScraper scraper = new PetSuppliesPlusScraper(brand,item);
-    try {
-      String newUrl = scraper.assembleURL(brand, item);
-      System.out.println("Fetching URL: " + newUrl); // Debug URL fetching
-      //this.driver.get(newUrl);
-      Document doc = scraper.performSearch(newUrl);
-      System.out.println("Document fetched, parsing results..."); // Debug document fetch
-      scraper.wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("coveo-results-column")));
-      scraper.parseResults(doc, brand, item);
-
-    } catch ( IOException | InterruptedException e) {
-      System.err.println("Failed to retrieve data: " + e.getMessage());
-    } finally {
-      if (scraper.driver != null) {
-        scraper.driver.quit();
-      }
-    }
+  @Override
+  public List<String> getResults() {
+    return results;
   }
+
 }

@@ -2,10 +2,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.jsoup.select.Evaluator;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -21,6 +24,8 @@ import java.time.Duration;
 import java.util.Random;
 
 public class PetcoScraper implements Scraper {
+
+  private List<String> results = new ArrayList<>();
 
   private WebDriver driver;
   private WebDriverWait wait;
@@ -85,29 +90,34 @@ public class PetcoScraper implements Scraper {
   @Override
   public void parseResults(Document doc, String brand, String item) {
     System.out.println("Received document length: " + doc.html().length()); // Debug document length
-    Elements itemTitles = doc.select(".ProductTile-styled__ProductInfoContainer-sc-8250527c-2.coylKt");
-    Elements itemPrices = doc.select(".typography__StyledTypography-sc-787b37da-0.typography___StyledStyledTypography-sc-787b37da-1.gKxANB.cbuIEA.price___StyledTypography-sc-e02ddb13-0.fvnbvH");
-    System.out.println("Found " + itemTitles.size() + " items"); // Debug number of items found
+    Elements uls = doc.select("ul");
+    for (int i = 0; i < uls.size(); i++) {
+      if (!uls.get(i).attr("title").contains("out of 5 stars")) {
+        continue;
+      }
+      Element title = uls.get(i).parent().previousElementSibling();
+      Element price = uls.get(i).parent().nextElementSibling();
+      //System.out.println(title.text());
+      //System.out.println(price.text());
+      if (title != null && price != null) {
+        String titleText = title.text();
+        String priceText = price.text();
 
-    for (int i = 0; i < itemTitles.size(); i++) {
-      Element title = itemTitles.get(i);
-      Element price = (itemPrices.size() > i) ? itemPrices.get(i) : null;
-
-      if (title.text().toLowerCase().contains(item) && title.text().toLowerCase().contains(brand)) {
-        String outputMessage = "Title: " + title.text();
-        if (price != null) {
-          outputMessage += " | Price: " + price.text();
-        } else {
-          outputMessage += "Price not found";
+        if (titleText.toLowerCase().contains(item.toLowerCase()) && titleText.toLowerCase().contains(brand.toLowerCase())) {
+          results.add("Title: " + titleText + " | Price: " + priceText);
         }
-        System.out.println(outputMessage);
       }
     }
   }
 
+  @Override
+  public List<String> getResults() {
+    return results;
+  }
+
   public static void main(String[] args) {
-    String brand = "arm & hammer";
-    String item = "deodorizer";
+    String brand = "orijen";
+    String item = "cat food";
 
     PetcoScraper scraper = new PetcoScraper(brand,item);
 
@@ -126,4 +136,5 @@ public class PetcoScraper implements Scraper {
       }
     }
   }
+
 }

@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import org.jsoup.nodes.Document;
 
 /**
@@ -41,4 +42,11 @@ public interface Scraper {
    * @param item The item name associated with the search.
    */
   void parseResults(Document doc, String brand, String item);
+
+  /**
+   * Retrieves a list of formatted result strings that contain title and price information.
+   *
+   * @return A list of strings each representing a found item with its price details.
+   */
+  List<String> getResults();
 }

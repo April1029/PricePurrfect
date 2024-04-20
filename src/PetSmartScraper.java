@@ -1,25 +1,13 @@
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 public class PetSmartScraper implements Scraper {
-
-  public static void main(String[] args) {
-    PetSmartScraper scraper = new PetSmartScraper();
-    String brand = "arm & hammer";
-    String item = "deodorizer";
-    try {
-      String url = scraper.assembleURL(brand, item);
-      System.out.println("Fetching URL: " + url); // Debug URL fetching
-      Document doc = scraper.performSearch(url);
-      System.out.println("Document fetched, parsing results..."); // Debug document fetch
-      scraper.parseResults(doc, brand, item);
-    } catch (IOException e) {
-      System.err.println("Failed to retrieve data: " + e.getMessage());
-    }
-  }
+  private List<String> results = new ArrayList<>();
 
   @Override
   public String assembleURL(String brand, String item) {
@@ -34,7 +22,7 @@ public class PetSmartScraper implements Scraper {
         .timeout(30000)
         .get();
 
-    System.out.println("Received document length: " + doc.html().length());
+    System.out.println("Received document length from PetSmart: " + doc.html().length());
     return doc;
   }
 
@@ -42,14 +30,19 @@ public class PetSmartScraper implements Scraper {
   public void parseResults(Document doc, String brand, String item) {
     Elements itemTitles = doc.select(".product-name");
     Elements itemPrices = doc.select(".product-price");
-    System.out.println("Found " + itemTitles.size() + " items");
+    System.out.println("Found " + itemTitles.size() + " items from PetSmart");
 
     for (int i = 0; i < itemTitles.size(); i++) {
       Element title = itemTitles.get(i);
       Element price = itemPrices.get(i);
       if (title.text().toLowerCase().contains(item.toLowerCase()) && title.text().toLowerCase().contains(brand.toLowerCase())) {
-        System.out.println("Title: " + title.text() + " | Price: " + price.text());
+        results.add("Title: " + title.text() + " | Price: " + price.text());
       }
     }
+  }
+
+  @Override
+  public List<String> getResults() {
+    return results;
   }
 }
