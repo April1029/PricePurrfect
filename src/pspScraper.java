@@ -1,112 +1,71 @@
-
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import java.time.Duration;
 
-public class pspScraper {
+public class pspScraper implements Scraper {
+  private List<Product> results = new ArrayList<>();
 
-  // Method to assemble the URL with search query parameters
-  private static String assembleURL(String brand, String item) throws UnsupportedEncodingException {
+  @Override
+  public String assembleURL(String brand, String item) {
     String baseurl = "https://www.petsuppliesplus.com/search?query=";
     String query = brand + " " + item;
     String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8).replace("+", "%20");
     return baseurl + encodedQuery + "#q=" + encodedQuery;
   }
 
-  // Method to perform the search
-  private static void performSearch(WebDriver driver, WebDriverWait wait, Actions actions, String brand, String item) throws InterruptedException {
-    WebElement searchBox = wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input[aria-label='Search']")));
-    searchBox.clear();
-    searchBox.sendKeys(brand + " " + item);
-    Thread.sleep(1000);
-    String enteredSearchTerm = searchBox.getAttribute("value");
-    System.out.println("Entered Search Term: " + enteredSearchTerm);
+  @Override
+  public Document performSearch(String url) throws IOException {
+    Document doc = Jsoup.connect(url)
+        .cookie("auth", "token")
+        .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36")
+        .timeout(30000)
+        .get();
 
-    try {
-      WebElement modal = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("suggested-store-modal")));
-      if (modal.isDisplayed()) {
-        WebElement closeModalButton = driver.findElement(By.cssSelector("button-to-close-modal")); // Replace with the actual selector to close the modal
-        closeModalButton.click();
-      }
-    } catch (Exception e) {
-      // If modal is not found or not visible, proceed
-    }
-
-    WebElement searchButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".CoveoSearchButton.coveo-accessible-button")));
-    ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", searchButton);
-    actions.moveToElement(searchButton).click().perform();
+    System.out.println("Received document length from PetSuppliesPlus: " + doc.html().length());
+    return doc;
   }
 
-  // Method to parse and extract data from the loaded results
-  private static void parseResults(WebDriver driver, String brand, String item) {
-    String pageSource = driver.getPageSource();
-    Document doc = Jsoup.parse(pageSource);
-    System.out.println("Received document length: " + doc.html().length()); // Debug document length
+  @Override
+  public void parseResults(Document doc, String brand, String item) {
     Elements itemTitles = doc.select(".CoveoResultLink.coveo-link-click.coveo-result-title");
-    Elements itemPrices = doc.select(".price");
-    System.out.println("Found " + itemTitles.size() + " items"); // Debug number of items found
+    Elements itemPrices = doc.select(".product-price");
+    System.out.println("Found " + itemTitles.size() + " items from PetSmart");
 
     for (int i = 0; i < itemTitles.size(); i++) {
       Element title = itemTitles.get(i);
-      Element price = (itemPrices.size() > i) ? itemPrices.get(i) : null;
-      System.out.println(item);
-      System.out.println(brand);
-
-      if (title.text().toLowerCase().contains(item) && title.text().toLowerCase().contains(brand)) {
-        String outputMessage = "Title: " + title.text();
-        if (price != null) {
-          outputMessage += " | Price: " + price.text();
-        } else {
-          outputMessage += "Price not found";
-        }
-        System.out.println(outputMessage);
+      Element price = itemPrices.get(i);
+      if (title.text().toLowerCase().contains(item.toLowerCase()) && title.text().toLowerCase().contains(brand.toLowerCase())) {
+        Product product = new Product(title.text(), price.text());
+        results.add(product);
       }
     }
   }
 
+  @Override
+  public List<Product> getResults() {
+    return results;
+  }
+
   public static void main(String[] args) {
-    String brand = "instinct";
-    String item = "dry cat food";
-
-    ChromeOptions options = new ChromeOptions();
-    options.addArguments("--headless");
-    options.addArguments("--disable-gpu");
-    options.addArguments("--window-size=1920,1200");
-    options.addArguments("--ignore-certificate-errors");
-
-    WebDriver driver = new ChromeDriver(options);
-    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-    Actions actions = new Actions(driver);
-
+    pspScraper scraper = new pspScraper();
+    String brand = "Purina";  // Example brand
+    String item = "Cat Food"; // Example item
     try {
-      String newUrl = assembleURL(brand, item);
-      System.out.println("Fetching URL: " + newUrl); // Debug URL fetching
-      driver.get(newUrl);
-      performSearch(driver, wait, actions, brand, item);
-      System.out.println("Document fetched, parsing results..."); // Debug document fetch
-      wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("coveo-results-column")));
-      parseResults(driver, brand, item);
-
-    } catch (UnsupportedEncodingException | InterruptedException e) {
-      System.err.println("Failed to retrieve data: " + e.getMessage());
-    } finally {
-      if (driver != null) {
-        driver.quit();
-      }
+      String url = scraper.assembleURL(brand, item);
+      Document doc = scraper.performSearch(url);
+      // You can add a call to parseResults if you want to parse and print the parsed products as well
+      // scraper.parseResults(doc, brand, item);
+      // List<Product> products = scraper.getResults();
+      // products.forEach(System.out::println);
+      System.out.println(doc);  // Print the entire HTML content of the document
+    } catch (IOException e) {
+      System.err.println("An error occurred while attempting to connect to the site: " + e.getMessage());
     }
   }
 }

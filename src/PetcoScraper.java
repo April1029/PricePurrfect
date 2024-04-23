@@ -109,6 +109,7 @@ public class PetcoScraper implements Scraper {
         }
       }
     }
+    System.out.println("Total products after filtering: " + results.size());
   }
 
   @Override

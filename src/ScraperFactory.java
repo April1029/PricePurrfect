@@ -62,7 +62,7 @@ public class ScraperFactory {
       List<Product> petcoResults = petcoScraper.getResults();
 
       // Write results to CSV
-      CSVWriter.writeToCSV(petSmartResults, petSuppliesPlusResults, amazonResults, petcoResults);
+      csvvWriter.writeToCSV(petSmartResults, petSuppliesPlusResults, amazonResults, petcoResults);
 
       // Print all results
       System.out.println("PetSmart Results:");
