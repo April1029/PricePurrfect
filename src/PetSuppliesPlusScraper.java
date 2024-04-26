@@ -19,6 +19,10 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 
+/**
+ * Implements the Scraper interface for extracting product data from Pet Supplies Plus.
+ * Utilizes both Selenium WebDriver for web interaction and Jsoup for parsing HTML.
+ */
 public class PetSuppliesPlusScraper implements Scraper {
   private WebDriver driver;
   private WebDriverWait wait;
@@ -27,6 +31,12 @@ public class PetSuppliesPlusScraper implements Scraper {
   private  String item;
   private List<Product> results = new ArrayList<>();
 
+  /**
+   * Initializes a new scraper instance with headless ChromeDriver and specific search parameters.
+   *
+   * @param brand The brand to search for.
+   * @param item The specific item to search for.
+   */
   public PetSuppliesPlusScraper (String brand, String item) {
     this.brand = brand;
     this.item = item;
@@ -42,7 +52,14 @@ public class PetSuppliesPlusScraper implements Scraper {
 
   }
 
-  // Method to assemble the URL with search query parameters
+  /**
+   * Constructs the search URL using brand and item information.
+   *
+   * @param brand The brand part of the search query.
+   * @param item The title part of the search query.
+   * @return A URL encoded string that represents the search URL.
+   * @throws UnsupportedEncodingException If encoding fails.
+   */
   @Override
   public String assembleURL(String brand, String item) throws UnsupportedEncodingException {
     String baseurl = "https://www.petsuppliesplus.com/search?query=";
@@ -51,7 +68,14 @@ public class PetSuppliesPlusScraper implements Scraper {
     return baseurl + encodedQuery + "#q=" + encodedQuery;
   }
 
-  // Method to perform the search
+  /**
+   * Executes a web search using Selenium and captures the resulting page source.
+   *
+   * @param url The URL to fetch using Selenium WebDriver.
+   * @return A Jsoup Document parsed from the page source.
+   * @throws IOException If an error occurs during the web request.
+   * @throws InterruptedException If the thread sleep is interrupted.
+   */
   @Override
   public Document performSearch(String url) throws IOException, InterruptedException {
     this.driver.get(url);
@@ -62,6 +86,7 @@ public class PetSuppliesPlusScraper implements Scraper {
     String enteredSearchTerm = searchBox.getAttribute("value");
     System.out.println("Entered Search Term: " + enteredSearchTerm);
 
+    // Handle possible modal interruptions
     try {
       WebElement modal = this.wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("suggested-store-modal")));
       if (modal.isDisplayed()) {
@@ -72,6 +97,7 @@ public class PetSuppliesPlusScraper implements Scraper {
       // If modal is not found or not visible, proceed
     }
 
+    // Click the search button using Selenium methods
     WebElement searchButton = this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".CoveoSearchButton.coveo-accessible-button")));
     ((JavascriptExecutor) this.driver).executeScript("arguments[0].scrollIntoView(true);", searchButton);
     this.actions.moveToElement(searchButton).click().perform();
@@ -80,7 +106,13 @@ public class PetSuppliesPlusScraper implements Scraper {
     return doc;
   }
 
-  // Method to parse and extract data from the loaded results
+  /**
+   * Parses the HTML document to extract relevant product data.
+   *
+   * @param doc The document to parse.
+   * @param brand The brand used for filtering results.
+   * @param item The item description used for filtering results.
+   */
   @Override
   public void parseResults(Document doc, String brand, String item) {
 
@@ -94,14 +126,6 @@ public class PetSuppliesPlusScraper implements Scraper {
       Element price = (itemPrices.size() > i) ? itemPrices.get(i) : null;
 
       if (title.text().toLowerCase().contains(this.item.toLowerCase()) && title.text().toLowerCase().contains(this.brand.toLowerCase())) {
-
-        //String outputMessage = "Title: " + title.text();
-        //if (price != null) {
-        //  outputMessage += " | Price: " + price.text();
-        //} else {
-        //  outputMessage += "Price not found";
-        //}
-        // results.add(outputMessage);
         Product product = new Product(title.text(), price.text());
         results.add(product);
       }
@@ -109,6 +133,11 @@ public class PetSuppliesPlusScraper implements Scraper {
     System.out.println("Total products after filtering: " + results.size());
   }
 
+  /**
+   * Returns the list of products that have been found and added to the results list.
+   *
+   * @return A list of Product objects containing the search results.
+   */
   @Override
   public List<Product> getResults() {
     return results;

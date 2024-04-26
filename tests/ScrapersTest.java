@@ -10,14 +10,25 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.Test;
 
+/**
+ * Tests for various scraper implementations to verify URL assembly,
+ * search execution, results parsing, and final result retrieval.
+ */
 public class ScrapersTest {
 
+  /**
+   * Tests URL assembly across multiple scraper implementations to ensure that each scraper
+   * correctly formats the query URL based on given input parameters.
+   *
+   * @throws UnsupportedEncodingException if URL encoding is not supported.
+   */
   @Test
   public void testAssembleURL() throws UnsupportedEncodingException {
     // Define the brand and item
     String brand = "instinct";
     String item = "dry cat food";
 
+    // Initialize scrapers
     Scraper scraper1 = new PetSuppliesPlusScraper(brand, item);
     Scraper scraper2 = new PetSmartScraper();
     Scraper scraper3 = new PetcoScraper(brand, item);
@@ -40,6 +51,12 @@ public class ScrapersTest {
     assertEquals(expected4, result4);
   }
 
+  /**
+   * Tests the execution of a search using a scraper, ensuring that a non-null, non-empty document
+   * is retrieved as a result of the search operation.
+   *
+   * @throws IOException if an I/O error occurs during search execution.
+   */
   @Test
   public void testPerformSearch() throws IOException {
     // Create an instance of TestScraper
@@ -56,18 +73,23 @@ public class ScrapersTest {
     assertTrue(document.html().length() > 0); // Ensure that the HTML content is not empty
   }
 
+  /**
+   * Tests the parsing functionality of various scrapers to ensure they correctly interpret HTML
+   * and extract expected product details.
+   */
   @Test
   public void testParseResults() {
     // Call parseResults method
-    String brand = "brand"; // Replace with the brand you want to test against
-    String item = "Item"; // Replace with the item you want to test against
-    // Create an instance of TestScraper
+    String brand = "brand";
+    String item = "Item";
+
+    // Create instances of TestScrapers
     Scraper scraper1 = new PetSuppliesPlusScraper(brand, item);
     Scraper scraper2 = new PetSmartScraper();
     Scraper scraper3 = new PetcoScraper(brand, item);
     Scraper scraper4 = new AmazonScraper();
 
-    // Create a sample HTML document to parse for scrapers
+    // Create sample HTML documents to parse for scrapers
     // PSP
     String html1 = "<html><body>" +
         "<div class='CoveoResultLink coveo-link-click coveo-result-title'>Product 1 brand item</div>"
@@ -109,6 +131,7 @@ public class ScrapersTest {
     Document document3 = Jsoup.parse(html3);
     scraper3.parseResults(document3, brand, item);
 
+    // Amazon
     String html4 = "<html><body>" +
         "<div class='s-result-item'>" +
         "<span class='a-size-base-plus a-color-base a-text-normal'>brand item 1</span>" +
@@ -157,13 +180,36 @@ public class ScrapersTest {
     boolean containsBrandItem = title.contains("brand item");
     assertTrue(containsBrandItem);
 
-    // Assert that the product in the results list has the expected title and price
     assertEquals("brand item 1", results4.get(0).getTitle());
     assertEquals("25.99", results4.get(0).getPrice());
-
-
   }
 
+  /**
+   * Tests the retrieval of results from scrapers to confirm that the correct products,
+   * as added in test setup, are returned.
+   */
+  @Test
+  public void testGetResults() {
+    // Create a sample list of products
+    List<Product> expectedResults = new ArrayList<>();
+    expectedResults.add(new Product("Product 1", "10.99"));
+    expectedResults.add(new Product("Product 2", "20.49"));
 
+    // Create an instance of the TestScraper with the sample list of products
+    TestScraper scraper = new TestScraper(expectedResults);
+
+    // Call the getResults method
+    List<Product> actualResults = scraper.getResults();
+
+    // Assert that the results are not null
+    assertNotNull(actualResults);
+
+    // Assert that the returned results are equal to the expected results
+    assertEquals(expectedResults.size(), actualResults.size());
+    for (int i = 0; i < expectedResults.size(); i++) {
+      assertEquals(expectedResults.get(i).getTitle(), actualResults.get(i).getTitle());
+      assertEquals(expectedResults.get(i).getPrice(), actualResults.get(i).getPrice());
+    }
+  }
 }
 

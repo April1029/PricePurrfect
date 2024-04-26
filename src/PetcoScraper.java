@@ -23,6 +23,10 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.util.Random;
 
+/**
+ * Scraper implementation for the Petco website.
+ * It uses Selenium WebDriver to interact with the website and Jsoup to parse the HTML content.
+ */
 public class PetcoScraper implements Scraper {
 
   private List<Product> results = new ArrayList<>();
@@ -34,19 +38,31 @@ public class PetcoScraper implements Scraper {
   private  String item;
   private Random random;
 
+  /**
+   * Constructor initializes the scraper with a brand and item.
+   *
+   * @param brand The brand name to search for.
+   * @param item The item description to search for.
+   */
   public PetcoScraper (String brand, String item) {
     this.brand = brand;
     this.item = item;
     FirefoxOptions options = new FirefoxOptions();
-    options.addArguments("--headless");
+    options.addArguments("--headless"); // Run browser in headless mode
     this.driver = new FirefoxDriver(options);
     this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     this.actions = new Actions(driver);
     this.random = new Random();
-
   }
 
-  // Method to assemble the URL with search query parameters
+  /**
+   * Assembles a search URL for the Petco website based on the provided brand and item.
+   *
+   * @param brand The brand name to include in the query.
+   * @param item The item title to include in the query.
+   * @return A fully and properly encoded URL ready for browsing.
+   * @throws UnsupportedEncodingException if the encoding process fails.
+   */
   @Override
   public String assembleURL(String brand, String item) throws UnsupportedEncodingException {
     String baseurl = "https://www.petco.com/shop/en/petcostore/search?query=";
@@ -56,7 +72,15 @@ public class PetcoScraper implements Scraper {
   }
 
 
-  // Method to perform search operation
+  /**
+   * Uses Selenium to perform a search on the Petco website.
+   * Handles modals and inputs search terms into the search box.
+   *
+   * @param url The URL to fetch using the web driver.
+   * @return A Document object parsed from the HTML of the web page.
+   * @throws IOException if an error occurs during web navigation.
+   * @throws InterruptedException if the thread sleep is interrupted.
+   */
   @Override
   public Document performSearch(String url) throws IOException, InterruptedException {
     this.driver.get(url);
@@ -75,7 +99,7 @@ public class PetcoScraper implements Scraper {
     jsExecutor.executeScript("arguments[0].click();", searchBox);
     searchBox.clear();
     searchBox.sendKeys(brand + " " + item);
-    Thread.sleep(1000 + this.random.nextInt(2000));
+    Thread.sleep(1000 + this.random.nextInt(2000)); // Simulate a more human-like interaction
     String enteredSearchTerm = searchBox.getAttribute("value");
     System.out.println("Entered Search Term: " + enteredSearchTerm);
     WebElement searchButton = this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[aria-label='Search']")));
@@ -86,7 +110,13 @@ public class PetcoScraper implements Scraper {
     return doc;
   }
 
-  // Method to parse and extract data from the loaded results
+  /**
+   * Parses the HTML document to extract relevant product data.
+   *
+   * @param doc The document to parse.
+   * @param brand The brand used in filtering results.
+   * @param item The item description used in filtering results.
+   */
   @Override
   public void parseResults(Document doc, String brand, String item) {
     System.out.println("Received document length: " + doc.html().length()); // Debug document length
@@ -97,8 +127,6 @@ public class PetcoScraper implements Scraper {
       }
       Element title = uls.get(i).parent().previousElementSibling();
       Element price = uls.get(i).parent().nextElementSibling();
-      //System.out.println(title.text());
-      //System.out.println(price.text());
       if (title != null && price != null) {
         String titleText = title.text();
         String priceText = price.text();
@@ -112,6 +140,11 @@ public class PetcoScraper implements Scraper {
     System.out.println("Total products after filtering: " + results.size());
   }
 
+  /**
+   * Returns the list of products found during the scraping process.
+   *
+   * @return A list of Product objects.
+   */
   @Override
   public List<Product> getResults() {
     return results;

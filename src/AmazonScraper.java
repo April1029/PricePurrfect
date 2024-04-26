@@ -8,10 +8,21 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+/**
+ * Scraper implementation for Amazon. This class handles constructing search URLs,
+ * executing the search, parsing the results, and returning a list of products.
+ */
 public class AmazonScraper implements Scraper {
 
   private List<Product> results = new ArrayList<>();
 
+  /**
+   * Assembles a search URL for Amazon based on the specified brand and item.
+   *
+   * @param brand the brand of the product to search for
+   * @param item the type of the product to search for
+   * @return a properly encoded URL for searching on Amazon
+   */
   @Override
   public String assembleURL(String brand, String item) {
     try {
@@ -27,6 +38,13 @@ public class AmazonScraper implements Scraper {
     }
   }
 
+  /**
+   * Performs a web search on Amazon using the provided URL and retrieves the document.
+   *
+   * @param url the URL to connect to
+   * @return the Document object after connecting to the specified URL
+   * @throws IOException if an I/O error occurs
+   */
   @Override
   public Document performSearch(String url) throws IOException {
     Document doc = Jsoup.connect(url)
@@ -39,15 +57,18 @@ public class AmazonScraper implements Scraper {
       return doc;
   }
 
-
-
+  /**
+   * Parses the HTML document to extract relevant product data.
+   *
+   * @param doc the document to parse
+   * @param brand the brand of the product
+   * @param item the title of the product
+   */
   @Override
   public void parseResults(Document doc, String brand, String item) {
     // Select all items in the search result
     Elements items = doc.select(".s-result-item");
-    //System.out.println(items);
     System.out.println("Found " + items.size() + " items from Amazon"); // Debug number of items found
-
 
     // Loop through each item element
     for (int i = 0; i < items.size(); i++) {
@@ -69,11 +90,8 @@ public class AmazonScraper implements Scraper {
       }
       String price = whole + "." + fraction;
 
-      //System.out.println("Title: " + title + " | Price: " + whole + "." + fraction);
-
       // Only print out items that have a title and a price
-      // Do another layer of filtering here
-      // problem encountered: what if the user typed in brand with/without proper space?
+      // Do another layer of filtering here to validate the search results
       if (!title.isEmpty() && !whole.isEmpty()) {
         if (title.toLowerCase().contains(item.toLowerCase()) && title.toLowerCase().contains(brand.toLowerCase())) {
           //results.add("Title: " + title+ " | Price: " + whole + "." + fraction);
@@ -86,6 +104,11 @@ public class AmazonScraper implements Scraper {
     System.out.println("Total products after filtering: " + results.size());
   }
 
+  /**
+   * Returns the list of products found during the search.
+   *
+   * @return a list of Product objects
+   */
   @Override
   public List<Product> getResults() {
     return results;
