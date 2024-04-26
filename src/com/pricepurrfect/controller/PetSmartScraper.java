@@ -1,3 +1,6 @@
+package com.pricepurrfect.controller;
+
+import com.pricepurrfect.model.Product;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

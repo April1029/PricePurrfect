@@ -1,3 +1,4 @@
+package com.pricepurrfect.model;
 /**
  * Represents a product with a title and price.
  * This class provides a structured way to store information about a product,

@@ -1,3 +1,6 @@
+package com.pricepurrfect.controller;
+
+import com.pricepurrfect.model.Product;
 import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

@@ -1,3 +1,6 @@
+package com.pricepurrfect.view;
+
+import com.pricepurrfect.model.Product;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.util.ArrayList;

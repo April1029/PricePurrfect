@@ -1,3 +1,6 @@
+package com.pricepurrfect.controller;
+
+import com.pricepurrfect.model.Product;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,22 +28,14 @@ public class ScraperFactoryTest {
    */
   @Test
   public void testRunScrapers() throws IOException, InterruptedException {
-    // Setup
-    List<Product> expectedProducts = Arrays.asList(new Product("Test Product", "19.99"));
-    Scraper testScraper1 = new TestScraper(expectedProducts);
-    Scraper testScraper2 = new TestScraper(expectedProducts);
-
 
     // Create a Scanner object from a string input
     String input = "Instinct\nDry cat food\n";
     ByteArrayInputStream in = new ByteArrayInputStream(input.getBytes());
     Scanner scanner = new Scanner(in);
 
-    ScraperFactory factory = new ScraperFactory();
-
-
     // Execution
-    factory.runScrapers("Instinct", "Dry cat food", scanner);
+    ScraperFactory.runScrapers("Instinct", "Dry cat food", scanner);
 
     // Verification
     String userHome = System.getProperty("user.home");
