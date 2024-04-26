@@ -1,10 +1,11 @@
 package com.pricepurrfect.model;
+
 /**
- * Represents a product with a title and price.
- * This class provides a structured way to store information about a product,
- * which includes the product's title and its price.
+ * Represents a product with a title and price. This class provides a structured way to store
+ * information about a product, which includes the product's title and its price.
  */
 public class Product {
+
   private String title;
   private String price;
 
@@ -41,7 +42,7 @@ public class Product {
    * Returns a string representation of the product, combining title and price.
    *
    * @return A string in the format "Title: [title] | Price: [price]", which provides a concise
-   *         description of the product suitable for printing or logging.
+   * description of the product suitable for printing or logging.
    */
   @Override
   public String toString() {

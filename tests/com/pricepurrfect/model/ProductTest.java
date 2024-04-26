@@ -6,15 +6,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for the Product class.
- * This class tests various aspects of the Product object, including title retrieval, price retrieval,
- * and the string representation of a product.
+ * Unit tests for the Product class. This class tests various aspects of the Product object,
+ * including title retrieval, price retrieval, and the string representation of a product.
  */
 public class ProductTest {
 
   /**
-   * Tests the getTitle method of the Product class.
-   * Ensures that the title returned is accurate and not null.
+   * Tests the getTitle method of the Product class. Ensures that the title returned is accurate and
+   * not null.
    */
   @Test
   public void testGetTitle() {
@@ -32,8 +31,8 @@ public class ProductTest {
   }
 
   /**
-   * Tests the getPrice method of the Product class.
-   * Ensures that the price returned is accurate and not null.
+   * Tests the getPrice method of the Product class. Ensures that the price returned is accurate and
+   * not null.
    */
   @Test
   public void testGetPrice() {
@@ -51,8 +50,8 @@ public class ProductTest {
   }
 
   /**
-   * Tests the toString method of the Product class.
-   * Ensures that the string representation is formatted correctly and not null.
+   * Tests the toString method of the Product class. Ensures that the string representation is
+   * formatted correctly and not null.
    */
   @Test
   public void testToString() {

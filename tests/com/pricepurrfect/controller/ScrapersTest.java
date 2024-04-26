@@ -14,8 +14,8 @@ import org.jsoup.nodes.Document;
 import org.junit.Test;
 
 /**
- * Tests for various scraper implementations to verify URL assembly,
- * search execution, results parsing, and final result retrieval.
+ * Tests for various scraper implementations to verify URL assembly, search execution, results
+ * parsing, and final result retrieval.
  */
 public class ScrapersTest {
 
@@ -77,8 +77,8 @@ public class ScrapersTest {
   }
 
   /**
-   * Tests the parsing functionality of various scrapers to ensure they correctly interpret HTML
-   * and extract expected product details.
+   * Tests the parsing functionality of various scrapers to ensure they correctly interpret HTML and
+   * extract expected product details.
    */
   @Test
   public void testParseResults() {
@@ -188,8 +188,8 @@ public class ScrapersTest {
   }
 
   /**
-   * Tests the retrieval of results from scrapers to confirm that the correct products,
-   * as added in test setup, are returned.
+   * Tests the retrieval of results from scrapers to confirm that the correct products, as added in
+   * test setup, are returned.
    */
   @Test
   public void testGetResults() {

@@ -27,8 +27,8 @@ import java.time.Duration;
 import java.util.Random;
 
 /**
- * Scraper implementation for the Petco website.
- * It uses Selenium WebDriver to interact with the website and Jsoup to parse the HTML content.
+ * Scraper implementation for the Petco website. It uses Selenium WebDriver to interact with the
+ * website and Jsoup to parse the HTML content.
  */
 public class PetcoScraper implements Scraper {
 
@@ -38,16 +38,16 @@ public class PetcoScraper implements Scraper {
   private WebDriverWait wait;
   private Actions actions;
   private String brand;
-  private  String item;
+  private String item;
   private Random random;
 
   /**
    * Constructor initializes the scraper with a brand and item.
    *
    * @param brand The brand name to search for.
-   * @param item The item description to search for.
+   * @param item  The item description to search for.
    */
-  public PetcoScraper (String brand, String item) {
+  public PetcoScraper(String brand, String item) {
     this.brand = brand;
     this.item = item;
     FirefoxOptions options = new FirefoxOptions();
@@ -62,7 +62,7 @@ public class PetcoScraper implements Scraper {
    * Assembles a search URL for the Petco website based on the provided brand and item.
    *
    * @param brand The brand name to include in the query.
-   * @param item The item title to include in the query.
+   * @param item  The item title to include in the query.
    * @return A fully and properly encoded URL ready for browsing.
    * @throws UnsupportedEncodingException if the encoding process fails.
    */
@@ -76,28 +76,31 @@ public class PetcoScraper implements Scraper {
 
 
   /**
-   * Uses Selenium to perform a search on the Petco website.
-   * Handles modals and inputs search terms into the search box.
+   * Uses Selenium to perform a search on the Petco website. Handles modals and inputs search terms
+   * into the search box.
    *
    * @param url The URL to fetch using the web driver.
    * @return A Document object parsed from the HTML of the web page.
-   * @throws IOException if an error occurs during web navigation.
+   * @throws IOException          if an error occurs during web navigation.
    * @throws InterruptedException if the thread sleep is interrupted.
    */
   @Override
   public Document performSearch(String url) throws IOException, InterruptedException {
     this.driver.get(url);
     try {
-      WebElement modal = this.wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("suggested-store-modal")));
+      WebElement modal = this.wait.until(
+          ExpectedConditions.visibilityOfElementLocated(By.id("suggested-store-modal")));
       if (modal.isDisplayed()) {
-        WebElement closeModalButton = this.driver.findElement(By.cssSelector("button-to-close-modal")); // Replace with the actual selector to close the modal
+        WebElement closeModalButton = this.driver.findElement(By.cssSelector(
+            "button-to-close-modal")); // Replace with the actual selector to close the modal
         closeModalButton.click();
       }
     } catch (Exception e) {
       // If modal is not found or not visible, proceed
     }
 
-    WebElement searchBox = this.wait.until(ExpectedConditions.presenceOfElementLocated(By.id("header-search")));
+    WebElement searchBox = this.wait.until(
+        ExpectedConditions.presenceOfElementLocated(By.id("header-search")));
     JavascriptExecutor jsExecutor = (JavascriptExecutor) driver;
     jsExecutor.executeScript("arguments[0].click();", searchBox);
     searchBox.clear();
@@ -105,7 +108,8 @@ public class PetcoScraper implements Scraper {
     Thread.sleep(1000 + this.random.nextInt(2000)); // Simulate a more human-like interaction
     String enteredSearchTerm = searchBox.getAttribute("value");
     System.out.println("Entered Search Term: " + enteredSearchTerm);
-    WebElement searchButton = this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[aria-label='Search']")));
+    WebElement searchButton = this.wait.until(
+        ExpectedConditions.elementToBeClickable(By.cssSelector("input[aria-label='Search']")));
     ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", searchButton);
     this.actions.moveToElement(searchButton).click().perform();
     String pageSource = this.driver.getPageSource();
@@ -116,9 +120,9 @@ public class PetcoScraper implements Scraper {
   /**
    * Parses the HTML document to extract relevant product data.
    *
-   * @param doc The document to parse.
+   * @param doc   The document to parse.
    * @param brand The brand used in filtering results.
-   * @param item The item description used in filtering results.
+   * @param item  The item description used in filtering results.
    */
   @Override
   public void parseResults(Document doc, String brand, String item) {
@@ -134,7 +138,8 @@ public class PetcoScraper implements Scraper {
         String titleText = title.text();
         String priceText = price.text();
 
-        if (titleText.toLowerCase().contains(item.toLowerCase()) && titleText.toLowerCase().contains(brand.toLowerCase())) {
+        if (titleText.toLowerCase().contains(item.toLowerCase()) && titleText.toLowerCase()
+            .contains(brand.toLowerCase())) {
           Product product = new Product(title.text(), price.text());
           results.add(product);
         }

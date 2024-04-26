@@ -10,14 +10,14 @@ import java.util.Scanner;
 import org.jsoup.nodes.Document;
 
 /**
- * A factory class to manage multiple scrapers and coordinate the scraping process.
- * This class is designed to initialize scrapers for different stores, manage data retrieval, and output results.
+ * A factory class to manage multiple scrapers and coordinate the scraping process. This class is
+ * designed to initialize scrapers for different stores, manage data retrieval, and output results.
  */
 public class ScraperFactory {
 
   /**
-   * The main method that initiates the scraping process by collecting user input for brand and item,
-   * and calls the method to run scrapers.
+   * The main method that initiates the scraping process by collecting user input for brand and
+   * item, and calls the method to run scrapers.
    *
    * @param args The command line arguments (not used in this application).
    */
@@ -34,12 +34,13 @@ public class ScraperFactory {
   }
 
   /**
-   * Initializes specific scraper implementations and orchestrates the scraping process.
-   * Collects results from each scraper and writes them to a CSV file.
+   * Initializes specific scraper implementations and orchestrates the scraping process. Collects
+   * results from each scraper and writes them to a CSV file.
    *
-   * @param brand The brand to be searched across different stores.
-   * @param item The item to be searched.
-   * @param scanner The scanner object for user input (used here for maintaining a single scanner instance).
+   * @param brand   The brand to be searched across different stores.
+   * @param item    The item to be searched.
+   * @param scanner The scanner object for user input (used here for maintaining a single scanner
+   *                instance).
    */
   public static void runScrapers(String brand, String item, Scanner scanner) {
     PetSmartScraper petSmartScraper = new PetSmartScraper();
@@ -50,7 +51,8 @@ public class ScraperFactory {
     try {
       // Execute scraping operations for each scraper and collect results
       List<Product> petSmartResults = scrapeAndPrintResults(petSmartScraper, brand, item);
-      List<Product> petSuppliesPlusResults = scrapeAndPrintResults(petSuppliesPlusScraper, brand, item);
+      List<Product> petSuppliesPlusResults = scrapeAndPrintResults(petSuppliesPlusScraper, brand,
+          item);
       List<Product> amazonResults = scrapeAndPrintResults(amazonScraper, brand, item);
       List<Product> petcoResults = scrapeAndPrintResults(petcoScraper, brand, item);
 
@@ -58,7 +60,8 @@ public class ScraperFactory {
       String userHome = System.getProperty("user.home");
       String filePath = userHome + "/Downloads/Pet_Products.csv";
       try (Writer csvWriter = new FileWriter(filePath)) {
-        CSVWriter.writeToCSV(csvWriter, petSmartResults, petSuppliesPlusResults, amazonResults, petcoResults);
+        CSVWriter.writeToCSV(csvWriter, petSmartResults, petSuppliesPlusResults, amazonResults,
+            petcoResults);
       }
     } catch (IOException | InterruptedException e) {
       System.err.println("Failed to retrieve data: " + e.getMessage());
@@ -68,17 +71,18 @@ public class ScraperFactory {
   }
 
   /**
-   * Helper method to perform the scraping operation using a given scraper.
-   * It fetches the URL, retrieves the document, and parses the results.
+   * Helper method to perform the scraping operation using a given scraper. It fetches the URL,
+   * retrieves the document, and parses the results.
    *
    * @param scraper The scraper instance to use for fetching and parsing data.
-   * @param brand The brand to search for.
-   * @param item The item description to search for.
+   * @param brand   The brand to search for.
+   * @param item    The item description to search for.
    * @return A list of products retrieved and processed by the scraper.
-   * @throws IOException If an IO error occurs during scraping.
+   * @throws IOException          If an IO error occurs during scraping.
    * @throws InterruptedException If the thread is interrupted during execution.
    */
-  protected static List<Product> scrapeAndPrintResults(Scraper scraper, String brand, String item) throws IOException, InterruptedException {
+  protected static List<Product> scrapeAndPrintResults(Scraper scraper, String brand, String item)
+      throws IOException, InterruptedException {
     String url = scraper.assembleURL(brand, item);
     System.out.println("Fetching URL: " + url);
 

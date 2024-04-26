@@ -16,14 +16,16 @@ public class CSVWriter {
   /**
    * Writes product data from multiple retailer stores into a CSV format using the provided Writer.
    *
-   * @param csvWriter The writer to use for outputting the CSV data.
-   * @param smartResults List of products from PetSmart.
+   * @param csvWriter              The writer to use for outputting the CSV data.
+   * @param smartResults           List of products from PetSmart.
    * @param petSuppliesPlusResults List of products from PetSuppliesPlus.
-   * @param amazonResults List of products from Amazon.
-   * @param petcoResults List of products from Petco.
+   * @param amazonResults          List of products from Amazon.
+   * @param petcoResults           List of products from Petco.
    * @throws IOException if an I/O error occurs writing to the writer.
    */
-  public static void writeToCSV(Writer csvWriter, List<Product> smartResults, List<Product> petSuppliesPlusResults, List<Product> amazonResults, List<Product> petcoResults) throws IOException {
+  public static void writeToCSV(Writer csvWriter, List<Product> smartResults,
+      List<Product> petSuppliesPlusResults, List<Product> amazonResults, List<Product> petcoResults)
+      throws IOException {
     // Start the CSV with header columns
     csvWriter.append("Store,Product Title, Product Price\n");
     // Append results from each store to the CSV
@@ -39,11 +41,12 @@ public class CSVWriter {
    * Appends a list of products for a specific store to the CSV.
    *
    * @param storeName Name of the store the products are from.
-   * @param results List of products from the store.
+   * @param results   List of products from the store.
    * @param csvWriter The writer to use for outputting the CSV data.
    * @throws IOException if an I/O error occurs writing to the writer.
    */
-  private static void appendResultsToCSV(String storeName, List<Product> results, Writer csvWriter) throws IOException {
+  private static void appendResultsToCSV(String storeName, List<Product> results, Writer csvWriter)
+      throws IOException {
     // Sort products by price in ascending order before writing to CSV
     Collections.sort(results, new Comparator<Product>() {
       @Override

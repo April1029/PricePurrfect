@@ -23,24 +23,25 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 
 /**
- * Implements the Scraper interface for extracting product data from Pet Supplies Plus.
- * Utilizes both Selenium WebDriver for web interaction and Jsoup for parsing HTML.
+ * Implements the Scraper interface for extracting product data from Pet Supplies Plus. Utilizes
+ * both Selenium WebDriver for web interaction and Jsoup for parsing HTML.
  */
 public class PetSuppliesPlusScraper implements Scraper {
+
   private WebDriver driver;
   private WebDriverWait wait;
   private Actions actions;
   private String brand;
-  private  String item;
+  private String item;
   private List<Product> results = new ArrayList<>();
 
   /**
    * Initializes a new scraper instance with headless ChromeDriver and specific search parameters.
    *
    * @param brand The brand to search for.
-   * @param item The specific item to search for.
+   * @param item  The specific item to search for.
    */
-  public PetSuppliesPlusScraper (String brand, String item) {
+  public PetSuppliesPlusScraper(String brand, String item) {
     this.brand = brand;
     this.item = item;
     ChromeOptions options = new ChromeOptions();
@@ -59,7 +60,7 @@ public class PetSuppliesPlusScraper implements Scraper {
    * Constructs the search URL using brand and item information.
    *
    * @param brand The brand part of the search query.
-   * @param item The title part of the search query.
+   * @param item  The title part of the search query.
    * @return A URL encoded string that represents the search URL.
    * @throws UnsupportedEncodingException If encoding fails.
    */
@@ -76,13 +77,14 @@ public class PetSuppliesPlusScraper implements Scraper {
    *
    * @param url The URL to fetch using Selenium WebDriver.
    * @return A Jsoup Document parsed from the page source.
-   * @throws IOException If an error occurs during the web request.
+   * @throws IOException          If an error occurs during the web request.
    * @throws InterruptedException If the thread sleep is interrupted.
    */
   @Override
   public Document performSearch(String url) throws IOException, InterruptedException {
     this.driver.get(url);
-    WebElement searchBox = this.wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("input[aria-label='Search']")));
+    WebElement searchBox = this.wait.until(
+        ExpectedConditions.presenceOfElementLocated(By.cssSelector("input[aria-label='Search']")));
     searchBox.clear();
     searchBox.sendKeys(this.brand + " " + this.item);
     Thread.sleep(1000);
@@ -91,9 +93,11 @@ public class PetSuppliesPlusScraper implements Scraper {
 
     // Handle possible modal interruptions
     try {
-      WebElement modal = this.wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("suggested-store-modal")));
+      WebElement modal = this.wait.until(
+          ExpectedConditions.visibilityOfElementLocated(By.id("suggested-store-modal")));
       if (modal.isDisplayed()) {
-        WebElement closeModalButton = this.driver.findElement(By.cssSelector("button-to-close-modal")); // Replace with the actual selector to close the modal
+        WebElement closeModalButton = this.driver.findElement(By.cssSelector(
+            "button-to-close-modal")); // Replace with the actual selector to close the modal
         closeModalButton.click();
       }
     } catch (Exception e) {
@@ -101,8 +105,10 @@ public class PetSuppliesPlusScraper implements Scraper {
     }
 
     // Click the search button using Selenium methods
-    WebElement searchButton = this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".CoveoSearchButton.coveo-accessible-button")));
-    ((JavascriptExecutor) this.driver).executeScript("arguments[0].scrollIntoView(true);", searchButton);
+    WebElement searchButton = this.wait.until(ExpectedConditions.elementToBeClickable(
+        By.cssSelector(".CoveoSearchButton.coveo-accessible-button")));
+    ((JavascriptExecutor) this.driver).executeScript("arguments[0].scrollIntoView(true);",
+        searchButton);
     this.actions.moveToElement(searchButton).click().perform();
     String pageSource = this.driver.getPageSource();
     Document doc = Jsoup.parse(pageSource);
@@ -112,9 +118,9 @@ public class PetSuppliesPlusScraper implements Scraper {
   /**
    * Parses the HTML document to extract relevant product data.
    *
-   * @param doc The document to parse.
+   * @param doc   The document to parse.
    * @param brand The brand used for filtering results.
-   * @param item The item description used for filtering results.
+   * @param item  The item description used for filtering results.
    */
   @Override
   public void parseResults(Document doc, String brand, String item) {
@@ -128,7 +134,8 @@ public class PetSuppliesPlusScraper implements Scraper {
       Element title = itemTitles.get(i);
       Element price = (itemPrices.size() > i) ? itemPrices.get(i) : null;
 
-      if (title.text().toLowerCase().contains(this.item.toLowerCase()) && title.text().toLowerCase().contains(this.brand.toLowerCase())) {
+      if (title.text().toLowerCase().contains(this.item.toLowerCase()) && title.text().toLowerCase()
+          .contains(this.brand.toLowerCase())) {
         Product product = new Product(title.text(), price.text());
         results.add(product);
       }

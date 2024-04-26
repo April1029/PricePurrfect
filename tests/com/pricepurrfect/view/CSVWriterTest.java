@@ -21,8 +21,8 @@ import java.util.List;
 public class CSVWriterTest {
 
   /**
-   * Tests the writeToCSV method with typical product data.
-   * This test verifies that the CSV output is formatted correctly and contains expected product data.
+   * Tests the writeToCSV method with typical product data. This test verifies that the CSV output
+   * is formatted correctly and contains expected product data.
    *
    * @throws IOException if an I/O error occurs, which can happen during the write operations.
    */
@@ -38,7 +38,8 @@ public class CSVWriterTest {
     List<Product> petcoResults = Arrays.asList(new Product("Orijen cat dry food", "$48.00"));
 
     // Use StringWriter with CSVWriter
-    CSVWriter.writeToCSV(stringWriter, smartResults, petSuppliesPlusResults, amazonResults, petcoResults);
+    CSVWriter.writeToCSV(stringWriter, smartResults, petSuppliesPlusResults, amazonResults,
+        petcoResults);
 
     // Convert StringWriter buffer to string
     String output = stringWriter.toString();
@@ -60,8 +61,8 @@ public class CSVWriterTest {
   }
 
   /**
-   * Tests the writeToCSV method with empty lists to ensure it handles empty inputs gracefully.
-   * This test checks that the output only contains the CSV header when there are no products to list.
+   * Tests the writeToCSV method with empty lists to ensure it handles empty inputs gracefully. This
+   * test checks that the output only contains the CSV header when there are no products to list.
    *
    * @throws IOException if an I/O error occurs, which can happen during the write operations.
    */

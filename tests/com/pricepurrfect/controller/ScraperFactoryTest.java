@@ -20,10 +20,11 @@ import java.util.List;
 public class ScraperFactoryTest {
 
   /**
-   * Tests the runScrapers method of the ScraperFactory to ensure it handles the scraping process correctly
-   * and outputs the results to a CSV file. This test verifies that the expected CSV file is created.
+   * Tests the runScrapers method of the ScraperFactory to ensure it handles the scraping process
+   * correctly and outputs the results to a CSV file. This test verifies that the expected CSV file
+   * is created.
    *
-   * @throws IOException if an error occurs during file operations.
+   * @throws IOException          if an error occurs during file operations.
    * @throws InterruptedException if the thread is interrupted during the execution.
    */
   @Test
